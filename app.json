@@ -24,6 +24,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "EXPO_PUBLIC_OPENAI_API_KEY": "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"
     }
   }
 }

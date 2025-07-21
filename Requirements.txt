@@ -1,0 +1,380 @@
+Absolutely. Here’s a detailed requirements document for your Expo React Native AI Life Advice app, focusing on clarity and completeness for development—while still keeping the project lean and manageable.
+
+AI Life Advice App – Detailed Requirements Document
+
+1. Overview
+Build a mobile app for iOS and Android that enables users to receive AI-powered life advice through a chat interface.
+ The app uses OpenAI for conversational intelligence, Supabase for authentication and data, and is built with Expo React Native.
+
+2. Functional Requirements
+2.1 Authentication & User Management
+Sign Up / Login
+
+
+Users can register and log in with email and password.
+
+
+Password reset functionality.
+
+
+Optional: OAuth sign-in with Google/Apple.
+
+
+User Profile
+
+
+View basic profile: name, email, optional avatar.
+
+
+Update profile info (name, avatar).
+
+
+Settings: Sign out, delete account (with confirmation modal).
+
+
+Store profile data in Supabase.
+
+
+
+2.2 AI Chat Functionality
+Single-threaded Conversational UI
+
+
+Main screen is a chat interface with the AI.
+
+
+Users can type messages; AI responds conversationally.
+
+
+Show AI typing/loading indicator while waiting for responses.
+
+
+Basic system prompt: set the AI’s personality as “empathetic, helpful life advisor.”
+
+
+Send & Receive Messages
+
+
+Messages are sent/received in real time (API call to OpenAI).
+
+
+Chat bubbles for user and AI messages.
+
+
+Scrollable conversation history.
+
+
+Error Handling
+
+
+Display error if OpenAI API fails or times out.
+
+
+Retry option for failed messages.
+
+
+
+2.3 Advice History
+Conversation Storage
+
+
+Each chat session is saved in Supabase (user-scoped).
+
+
+Conversations can be listed by date/time.
+
+
+Tap any conversation to reopen and view.
+
+
+Delete conversation (swipe or long-press).
+
+
+
+2.4 Topic Suggestions (Optional for MVP)
+Predefined Prompts
+
+
+“Suggest a topic” button in chat.
+
+
+Quick prompts: “Career advice”, “Relationship advice”, “Self-care”, etc.
+
+
+User can select to auto-fill message box.
+
+
+
+2.5 UI/UX Requirements
+Splash Screen
+
+
+Simple logo and app name.
+
+
+Onboarding
+
+
+Brief intro screens (max 2–3 slides): “How it works,” privacy, “Get started.”
+
+
+Design
+
+
+Minimal, clean interface.
+
+
+Consistent spacing, colors, and typography.
+
+
+Intuitive navigation (bottom tab or drawer if needed).
+
+
+Responsive for various screen sizes.
+
+
+Accessibility
+
+
+High contrast text
+
+
+Button touch targets large enough
+
+
+
+2.6 Privacy & Security
+Privacy Policy
+
+
+Link accessible from settings.
+
+
+Data Storage
+
+
+User data stored securely in Supabase.
+
+
+Only authenticated users can access their own data.
+
+
+
+2.7 App Settings
+Options
+
+
+Edit profile (name, avatar)
+
+
+Sign out
+
+
+Delete account
+
+
+View privacy policy
+
+
+(Optional) App theme toggle (light/dark)
+
+
+
+3. Non-Functional Requirements
+Performance
+
+
+Fast app startup (<2s splash)
+
+
+Smooth message sending/receiving
+
+
+Security
+
+
+Secure storage of tokens (Expo SecureStore)
+
+
+No sensitive data stored in plaintext
+
+
+Scalability
+
+
+Support for thousands of users (handled by Supabase/OpenAI APIs)
+
+
+Maintainability
+
+
+Well-structured, modular React Native codebase
+
+
+Clear documentation for setup, environment variables
+
+
+
+4. Technical Stack
+Frontend: Expo (React Native), Typescript
+
+
+Backend: Supabase (Auth, Database)
+
+
+AI: OpenAI API (GPT-4, or suitable model)
+
+
+State Management: React Context or Zustand (simple global state)
+
+
+Navigation: React Navigation
+
+
+Storage: AsyncStorage (for local), Supabase (for remote)
+
+
+Testing: Jest + Testing Library (optional for MVP)
+
+
+CI/CD: EAS (Expo Application Services) for build/deploy
+
+
+
+5. Database Schema (Supabase, basic)
+users
+
+
+id (UUID, primary)
+
+
+email
+
+
+name
+
+
+avatar_url
+
+
+created_at
+
+
+conversations
+
+
+id (UUID, primary)
+
+
+user_id (foreign key)
+
+
+title (optional)
+
+
+created_at
+
+
+messages
+
+
+id (UUID, primary)
+
+
+conversation_id (foreign key)
+
+
+sender (“user” or “ai”)
+
+
+content (text)
+
+
+timestamp
+
+
+
+6. User Flow
+App Launch
+
+
+Splash → Onboarding (if first time) → Auth screen
+
+
+Authentication
+
+
+Sign up/in → Home (chat)
+
+
+Chat
+
+
+User types message → OpenAI responds
+
+
+Chat auto-saves as new conversation (if new)
+
+
+Advice History
+
+
+Access previous conversations
+
+
+View or delete
+
+
+Profile/Settings
+
+
+Edit profile, sign out, delete account, view privacy
+
+
+
+7. Error & Edge Cases
+No internet: show offline indicator
+
+
+API timeout: show retry button
+
+
+Account deletion: confirm with modal and remove user data
+
+
+
+8. Deliverables
+Expo React Native project (Typescript)
+
+
+Supabase project setup (schema + API keys)
+
+
+Environment variables (API keys, URLs)
+
+
+README with setup instructions
+
+
+(Optional) Figma or design screenshots
+
+
+
+9. Roadmap/Phases (suggested)
+Phase 1: Auth, Chat UI, OpenAI integration
+
+
+Phase 2: Save conversation history, settings/profile
+
+
+Phase 3: Topic suggestions, polish UI, onboarding
+
+
+Phase 4: Beta test & bugfix, App Store/Play Store prep
+
+
+
+Ready to proceed?
+ Would you like a project directory structure or component breakdown next?
+Click here to try a new GPT!
+
