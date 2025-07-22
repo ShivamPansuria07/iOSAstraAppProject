@@ -1,24 +1,128 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius } from '../theme';
 import ChatMessage from '../components/ChatMessage';
 import OpenAIService, { ChatMessage as ChatMessageType } from '../services/openai';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 
-const promptSuggestions = [
-  'Tell me about my love life',
-  'Career advice for me',
-  'Daily horoscope',
-  'Life coaching session',
-];
+const featureConfigs: Record<string, { title: string; systemMessage: string; prompts: string[] }> = {
+  ask: {
+    title: 'Ask me anything',
+    systemMessage: "What's on your mind?",
+    prompts: [
+      'What is the best career for me?',
+      'What self care should I practice today?',
+      'How can I improve my relationships?',
+      'What should I focus on this week?',
+    ],
+  },
+  horoscope: {
+    title: 'Daily horoscope',
+    systemMessage: "Here’s your daily horoscope!",
+    prompts: [
+      'What does my horoscope say today?',
+      'What should I be aware of this week?',
+      'How will my day go?',
+    ],
+  },
+  romantic: {
+    title: 'Romantic compatibility',
+    systemMessage: "Let's explore your romantic compatibility!",
+    prompts: [
+      'Are we a good match?',
+      'What is my love compatibility with Leo?',
+      'How can I improve my relationship?',
+    ],
+  },
+  soulmate: {
+    title: 'Your soulmate',
+    systemMessage: "Let's talk about your soulmate!",
+    prompts: [
+      'Who is my soulmate?',
+      'How will I meet my soulmate?',
+      'What qualities should I look for?',
+    ],
+  },
+  friend: {
+    title: 'Friend compatibility',
+    systemMessage: "Let's check your friend compatibility!",
+    prompts: [
+      'Are we compatible as friends?',
+      'How can I strengthen my friendships?',
+      'What should I know about my friend?',
+    ],
+  },
+  dream: {
+    title: 'Dream interpreter',
+    systemMessage: "Tell me about your dream!",
+    prompts: [
+      'What does it mean to dream of flying?',
+      'I had a dream about water, what does it mean?',
+      'Can you interpret my dream?',
+    ],
+  },
+  astro: {
+    title: 'Astrological events',
+    systemMessage: "Here are the latest astrological events!",
+    prompts: [
+      'What astrological events are happening this month?',
+      'How will the full moon affect me?',
+      'What should I know about Mercury retrograde?',
+    ],
+  },
+  tarot: {
+    title: 'Tarot card interpreter',
+    systemMessage: "Let's interpret your tarot cards!",
+    prompts: [
+      'What does the Lovers card mean?',
+      'Can you interpret a tarot spread for me?',
+      'What is the meaning of the Tower card?',
+    ],
+  },
+  growth: {
+    title: 'Personal growth tips',
+    systemMessage: "Let's talk about your personal growth!",
+    prompts: [
+      'How can I be more productive?',
+      'What habits should I develop?',
+      'How can I improve myself?',
+    ],
+  },
+};
+
+type ChatScreenRouteProp = RouteProp<{ params: { feature?: string } }, 'params'>;
 
 export default function ChatScreen() {
+  const route = useRoute<ChatScreenRouteProp>();
+  const featureKey = route.params?.feature || 'ask';
+  const config = featureConfigs[featureKey] || featureConfigs['ask'];
   const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState<ChatMessageType[]>(OpenAIService.getConversationHistory());
+  const [chatHistory, setChatHistory] = useState<ChatMessageType[]>(OpenAIService.getConversationHistory(featureKey));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    // If no chat history for this feature, start with the system message
+    const history = OpenAIService.getConversationHistory(featureKey);
+    if (!history.length) {
+      const systemMsg: ChatMessageType = {
+        id: 'system',
+        content: config.systemMessage,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      OpenAIService.clearConversation(featureKey);
+      OpenAIService.addMessage(featureKey, systemMsg);
+      setChatHistory([systemMsg]);
+    } else {
+      setChatHistory(history);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [featureKey]);
 
   const handleSend = async (text?: string) => {
     const userMessage = (text !== undefined ? text : message).trim();
@@ -27,8 +131,8 @@ export default function ChatScreen() {
     setLoading(true);
     setMessage('');
     try {
-      const response = await OpenAIService.sendMessage(userMessage);
-      setChatHistory(OpenAIService.getConversationHistory());
+      const response = await OpenAIService.sendMessage(userMessage, featureKey, config.systemMessage);
+      setChatHistory(OpenAIService.getConversationHistory(featureKey));
       if (!response.success && response.error) {
         setError(response.error);
       }
@@ -52,73 +156,71 @@ export default function ChatScreen() {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <LinearGradient
-        colors={[colors.background, colors.surface]}
-        style={styles.gradient}
+      <View style={styles.headerBar}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={28} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{config.title}</Text>
+      </View>
+      <View style={styles.divider} />
+      <ScrollView
+        style={styles.chatContainer}
+        ref={scrollViewRef}
+        contentContainerStyle={{ paddingBottom: spacing.lg }}
+        showsVerticalScrollIndicator={false}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Chat with Astra</Text>
-        </View>
-
-        <ScrollView
-          style={styles.chatContainer}
-          ref={scrollViewRef}
-          contentContainerStyle={{ paddingBottom: spacing.lg }}
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-        >
-          <View style={styles.welcomeMessage}>
-            <Text style={styles.welcomeText}>Hello! I'm Astra, your AI life advisor. How can I help you today?</Text>
+        {chatHistory.map((msg, idx) => (
+          <View key={msg.id + idx} style={msg.role === 'assistant' ? styles.systemMessage : undefined}>
+            {msg.role === 'assistant' ? (
+              <Text style={styles.systemText}><Text style={{ fontWeight: 'bold' }}>Astra:</Text>{'\n'}{msg.content}</Text>
+            ) : (
+              <ChatMessage message={msg} />
+            )}
           </View>
-          {chatHistory.map(msg => (
-            <ChatMessage key={msg.id} message={msg} />
-          ))}
-          {loading && (
-            <View style={{ alignItems: 'center', marginVertical: spacing.md }}>
-              <ActivityIndicator size="small" color={colors.primary} />
-            </View>
-          )}
-          {error && (
-            <Text style={{ color: 'red', textAlign: 'center', marginVertical: spacing.sm }}>{error}</Text>
-          )}
-        </ScrollView>
-
-        <View style={styles.suggestionsContainer}>
-          <Text style={styles.suggestionsTitle}>Quick Prompts</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {promptSuggestions.map((suggestion, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.suggestionChip}
-                activeOpacity={0.8}
-                onPress={() => handlePrompt(suggestion)}
-                disabled={loading}
-              >
-                <Text style={styles.suggestionText}>{suggestion}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Type your message..."
-              placeholderTextColor={colors.textMuted}
-              value={message}
-              onChangeText={setMessage}
-              multiline
-              editable={!loading}
-              onSubmitEditing={() => handleSend()}
-              returnKeyType="send"
-            />
-            <TouchableOpacity style={styles.sendButton} activeOpacity={0.8} onPress={() => handleSend()} disabled={loading || !message.trim()}>
-              <Ionicons name="send" size={20} color="white" />
+        ))}
+        {loading && (
+          <View style={{ alignItems: 'center', marginVertical: spacing.md }}>
+            <ActivityIndicator size="small" color={colors.primary} />
+          </View>
+        )}
+        {error && (
+          <Text style={{ color: 'red', textAlign: 'center', marginVertical: spacing.sm }}>{error}</Text>
+        )}
+      </ScrollView>
+      <View style={styles.promptsRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {config.prompts.map((suggestion: string, index: number) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.promptChip}
+              activeOpacity={0.8}
+              onPress={() => handlePrompt(suggestion)}
+              disabled={loading}
+            >
+              <Text style={styles.promptText}>{suggestion}</Text>
             </TouchableOpacity>
-          </View>
+          ))}
+        </ScrollView>
+      </View>
+      <View style={styles.inputContainer}>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.textInput}
+            placeholder={config.title + '...'}
+            placeholderTextColor={colors.textMuted}
+            value={message}
+            onChangeText={setMessage}
+            multiline
+            editable={!loading}
+            onSubmitEditing={() => handleSend()}
+            returnKeyType="send"
+          />
+          <TouchableOpacity style={styles.sendButton} activeOpacity={0.8} onPress={() => handleSend()} disabled={loading || !message.trim()}>
+            <Ionicons name="send" size={20} color="white" />
+          </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -126,83 +228,87 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
   },
-  gradient: {
-    flex: 1,
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 56,
+    paddingBottom: 12,
+    backgroundColor: '#000',
   },
-  header: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+  backButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    marginRight: 8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: colors.text,
+    color: 'white',
+    flex: 1,
     textAlign: 'center',
+    marginRight: 40, // to balance the back button
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#222',
+    marginBottom: 8,
   },
   chatContainer: {
     flex: 1,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 0,
   },
-  welcomeMessage: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginTop: spacing.lg,
-    marginBottom: spacing.lg,
+  systemMessage: {
+    marginVertical: 18,
+    marginHorizontal: 18,
+    backgroundColor: 'transparent',
   },
-  welcomeText: {
+  systemText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '400',
+    marginBottom: 2,
+  },
+  promptsRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    marginLeft: 8,
+  },
+  promptChip: {
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 10,
+    backgroundColor: 'transparent',
+  },
+  promptText: {
+    color: 'white',
     fontSize: 16,
-    color: colors.text,
-    lineHeight: 24,
-  },
-  suggestionsContainer: {
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  suggestionsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  suggestionChip: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginRight: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  suggestionText: {
-    fontSize: 14,
-    color: colors.textSecondary,
+    fontWeight: '500',
   },
   inputContainer: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    paddingHorizontal: 8,
+    paddingBottom: 16,
+    paddingTop: 4,
+    backgroundColor: '#000',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    backgroundColor: '#181818',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   textInput: {
     flex: 1,
     fontSize: 16,
-    color: colors.text,
+    color: 'white',
     maxHeight: 100,
-    paddingVertical: spacing.sm,
+    paddingVertical: 8,
   },
   sendButton: {
     backgroundColor: colors.primary,
@@ -211,7 +317,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: spacing.sm,
+    marginLeft: 8,
     opacity: 1,
   },
 }); 

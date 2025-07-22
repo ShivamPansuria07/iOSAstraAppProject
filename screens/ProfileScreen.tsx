@@ -1,18 +1,28 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '../theme';
 
-const settingsOptions = [
-  { id: 1, title: 'Edit Profile', icon: 'person', color: colors.primary },
-  { id: 2, title: 'Privacy Policy', icon: 'shield-checkmark', color: colors.info },
-  { id: 3, title: 'Terms of Service', icon: 'document-text', color: colors.warning },
-  { id: 4, title: 'Sign Out', icon: 'log-out', color: colors.error },
-  { id: 5, title: 'Delete Account', icon: 'trash', color: colors.error },
+const zodiacSigns = [
+  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
 
 export default function ProfileScreen() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [name, setName] = useState('John Doe');
+  const [email, setEmail] = useState('john.doe@example.com');
+  const [zodiac, setZodiac] = useState('Aquarius');
+  const [editName, setEditName] = useState(name);
+  const [editEmail, setEditEmail] = useState(email);
+  const [editZodiac, setEditZodiac] = useState(zodiac);
+
+  const handleSave = () => {
+    setName(editName);
+    setEmail(editEmail);
+    setZodiac(editZodiac);
+    setModalVisible(false);
+  };
+
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -31,179 +41,275 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleOptionPress = (title: string) => {
-    switch (title) {
-      case 'Sign Out':
-        handleSignOut();
-        break;
-      case 'Delete Account':
-        handleDeleteAccount();
-        break;
-      default:
-        // Handle other options
-        break;
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={[colors.background, colors.surface]}
-        style={styles.gradient}
-      >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Profile</Text>
-          </View>
-
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.profileTitle}>Profile</Text>
+        <LinearGradient
+          colors={["#e96443", "#904e95"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.profileCardGradient}
+        >
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatar}>👤</Text>
+              <Text style={styles.avatar}>🪞</Text>
             </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.userName}>John Doe</Text>
-              <Text style={styles.userEmail}>john.doe@example.com</Text>
-              <Text style={styles.userSign}>Zodiac Sign: Leo</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name}>{name}</Text>
+              <Text style={styles.email}>{email}</Text>
+              <Text style={styles.zodiac}>♒ {zodiac}</Text>
+            </View>
+            <TouchableOpacity style={styles.editButton} onPress={() => {
+              setEditName(name); setEditEmail(email); setEditZodiac(zodiac); setModalVisible(true);
+            }}>
+              <Text style={styles.editButtonText}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+
+        <View style={styles.settingsSection}>
+          <TouchableOpacity style={styles.settingOption} onPress={handleSignOut}>
+            <Text style={styles.settingText}>Sign Out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.settingOption} onPress={handleDeleteAccount}>
+            <Text style={[styles.settingText, { color: '#ff4d4d' }]}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.appInfo}>
+          <Text style={styles.appVersion}>Astra v1.0.0</Text>
+          <Text style={styles.appDescription}>
+            Your AI-powered life advisor for personalized guidance and insights.
+          </Text>
+        </View>
+
+        {/* Edit Profile Modal */}
+        <Modal visible={modalVisible} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TextInput
+                style={styles.input}
+                value={editName}
+                onChangeText={setEditName}
+                placeholder="Name"
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                value={editEmail}
+                onChangeText={setEditEmail}
+                placeholder="Email"
+                placeholderTextColor="#aaa"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <Text style={styles.label}>Zodiac Sign</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+                {zodiacSigns.map(sign => (
+                  <TouchableOpacity
+                    key={sign}
+                    style={[styles.zodiacChip, editZodiac === sign && styles.zodiacChipSelected]}
+                    onPress={() => setEditZodiac(sign)}
+                  >
+                    <Text style={[styles.zodiacChipText, editZodiac === sign && { color: '#fff' }]}>{sign}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-
-          <View style={styles.settingsSection}>
-            <Text style={styles.sectionTitle}>Settings</Text>
-            {settingsOptions.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={styles.settingOption}
-                activeOpacity={0.8}
-                onPress={() => handleOptionPress(option.title)}
-              >
-                <View style={[styles.optionIcon, { backgroundColor: option.color }]}>
-                  <Ionicons name={option.icon as any} size={20} color="white" />
-                </View>
-                <Text style={styles.optionTitle}>{option.title}</Text>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <View style={styles.appInfo}>
-            <Text style={styles.appVersion}>Astra v1.0.0</Text>
-            <Text style={styles.appDescription}>
-              Your AI-powered life advisor for personalized guidance and insights.
-            </Text>
-          </View>
-        </ScrollView>
-      </LinearGradient>
-    </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
   container: {
     flex: 1,
+    backgroundColor: '#000',
+    paddingHorizontal: 18,
+    paddingTop: 32,
   },
-  gradient: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: 24,
+  profileTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: colors.text,
+    color: 'white',
+    marginBottom: 24,
     textAlign: 'center',
+  },
+  profileCardGradient: {
+    borderRadius: 18,
+    marginBottom: 18,
   },
   profileCard: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    margin: spacing.md,
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: borderRadius.xl,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  avatar: {
-    fontSize: 40,
-  },
-  profileInfo: {
-    alignItems: 'center',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
-  userSign: {
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  settingsSection: {
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
-  settingOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
   },
-  optionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
+  avatarContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.18)',
     alignItems: 'center',
-    marginRight: spacing.md,
+    justifyContent: 'center',
+    marginRight: 18,
   },
-  optionTitle: {
-    flex: 1,
-    fontSize: 16,
+  avatar: {
+    fontSize: 28,
+  },
+  name: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  email: {
+    color: '#b0b0b0',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  zodiac: {
+    color: 'white',
+    fontSize: 15,
+    opacity: 0.8,
+  },
+  editButton: {
+    backgroundColor: '#fff2',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    marginLeft: 12,
+  },
+  editButtonText: {
+    color: 'white',
     fontWeight: '600',
-    color: colors.text,
+    fontSize: 15,
+  },
+  settingsSection: {
+    marginTop: 18,
+    marginBottom: 18,
+  },
+  settingOption: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+  },
+  settingText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
   },
   appInfo: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
     alignItems: 'center',
+    marginTop: 32,
   },
   appVersion: {
-    fontSize: 16,
+    color: 'white',
+    fontSize: 15,
     fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.sm,
+    marginBottom: 4,
   },
   appDescription: {
+    color: '#b0b0b0',
     fontSize: 14,
-    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#181818',
+    borderRadius: 18,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 18,
+    textAlign: 'center',
+  },
+  input: {
+    backgroundColor: '#222',
+    color: 'white',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  label: {
+    color: '#b0b0b0',
+    fontSize: 15,
+    marginBottom: 6,
+  },
+  zodiacChip: {
+    borderWidth: 1,
+    borderColor: '#fff2',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: 'transparent',
+  },
+  zodiacChipSelected: {
+    backgroundColor: '#e96443',
+    borderColor: '#e96443',
+  },
+  zodiacChipText: {
+    color: '#fff',
+    fontSize: 15,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  saveButton: {
+    backgroundColor: '#e96443',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#333',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 }); 

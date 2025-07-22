@@ -18,7 +18,7 @@ export interface ChatResponse {
 
 export class OpenAIService {
   private static instance: OpenAIService;
-  private conversationHistory: ChatMessage[] = [];
+  private conversationHistories: Record<string, ChatMessage[]> = {};
 
   static getInstance(): OpenAIService {
     if (!OpenAIService.instance) {
@@ -27,10 +27,14 @@ export class OpenAIService {
     return OpenAIService.instance;
   }
 
-  async sendMessage(userMessage: string): Promise<ChatResponse> {
+  async sendMessage(userMessage: string, featureKey: string, systemPrompt: string): Promise<ChatResponse> {
     try {
       if (!OPENAI_API_KEY) {
         throw new Error('OpenAI API key not configured');
+      }
+
+      if (!this.conversationHistories[featureKey]) {
+        this.conversationHistories[featureKey] = [];
       }
 
       // Add user message to conversation history
@@ -40,15 +44,15 @@ export class OpenAIService {
         role: 'user',
         timestamp: new Date(),
       };
-      this.conversationHistory.push(userMsg);
+      this.conversationHistories[featureKey].push(userMsg);
 
       // Prepare messages for OpenAI API
       const messages = [
         {
           role: 'system',
-          content: `You are Astra, an empathetic and wise AI life advisor. You provide thoughtful, personalized guidance on relationships, career, personal growth, and life challenges. Always be supportive, understanding, and offer practical advice while maintaining a warm, caring tone. Keep responses conversational and helpful.`,
+          content: systemPrompt,
         },
-        ...this.conversationHistory.map(msg => ({
+        ...this.conversationHistories[featureKey].map(msg => ({
           role: msg.role,
           content: msg.content,
         })),
@@ -88,7 +92,7 @@ export class OpenAIService {
         role: 'assistant',
         timestamp: new Date(),
       };
-      this.conversationHistory.push(aiMsg);
+      this.conversationHistories[featureKey].push(aiMsg);
 
       return {
         success: true,
@@ -103,16 +107,19 @@ export class OpenAIService {
     }
   }
 
-  getConversationHistory(): ChatMessage[] {
-    return [...this.conversationHistory];
+  getConversationHistory(featureKey: string): ChatMessage[] {
+    return [...(this.conversationHistories[featureKey] || [])];
   }
 
-  clearConversation(): void {
-    this.conversationHistory = [];
+  clearConversation(featureKey: string): void {
+    this.conversationHistories[featureKey] = [];
   }
 
-  addMessage(message: ChatMessage): void {
-    this.conversationHistory.push(message);
+  addMessage(featureKey: string, message: ChatMessage): void {
+    if (!this.conversationHistories[featureKey]) {
+      this.conversationHistories[featureKey] = [];
+    }
+    this.conversationHistories[featureKey].push(message);
   }
 }
 
