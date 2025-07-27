@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 export default function PeopleScreen() {
   return (
@@ -9,29 +11,44 @@ export default function PeopleScreen() {
         <Text style={styles.title}>People in your life</Text>
         <Text style={styles.subtitle}>People will be added automatically as you talk about them in chat</Text>
 
-        <TouchableOpacity style={styles.newPersonCard} activeOpacity={0.85}>
-          <View style={styles.plusContainer}>
-            <Text style={styles.plus}>+</Text>
-          </View>
-          <Text style={styles.newPersonText}>New Person</Text>
-        </TouchableOpacity>
+        {/* New Person Card */}
+        <View style={styles.newPersonCardWrap}>
+          <TouchableOpacity style={styles.newPersonCard} activeOpacity={0.85}>
+            <View style={styles.plusBox}>
+              <Text style={styles.plus}>+</Text>
+            </View>
+            <View style={styles.verticalDivider} />
+            <Text style={styles.newPersonText}>New Person</Text>
+          </TouchableOpacity>
+        </View>
 
+        {/* You Card */}
         <LinearGradient
-          colors={["#e96443", "#904e95"]}
+          colors={["#c471f5", "#fa71cd"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.youCardGradient}
         >
           <View style={styles.youCard}>
-            <View style={styles.youEmojiContainer}>
-              <Text style={styles.youEmoji}>🪞</Text>
+            <View style={styles.youIconWrap}>
+              <Text style={styles.youIcon}>🪞</Text>
             </View>
-            <View>
+            <View style={styles.youInfo}>
               <Text style={styles.youName}>You</Text>
               <Text style={styles.youSign}>⚙ Aquarius</Text>
             </View>
           </View>
         </LinearGradient>
+
+        {/* Sign Out & Delete Account Buttons */}
+        <View style={styles.actionsWrap}>
+          <TouchableOpacity style={styles.actionBtn}>
+            <Text style={styles.actionText}>Sign Out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.actionBtn, { borderColor: '#ff4d4d' }] }>
+            <Text style={[styles.actionText, { color: '#ff4d4d' }]}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -59,70 +76,101 @@ const styles = StyleSheet.create({
     color: '#b0b0b0',
     marginBottom: 28,
   },
+  newPersonCardWrap: {
+    marginBottom: 22,
+    alignItems: 'center',
+  },
   newPersonCard: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: 'white',
     borderRadius: 18,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    marginBottom: 22,
+    width: width - 36,
+    height: 64,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
   },
-  plusContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: 'white',
+  plusBox: {
+    width: 64,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
   },
   plus: {
     color: 'white',
-    fontSize: 22,
+    fontSize: 32,
     fontWeight: 'bold',
     marginTop: -2,
   },
+  verticalDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: 'white',
+    opacity: 0.5,
+  },
   newPersonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
+    marginLeft: 24,
   },
   youCardGradient: {
     borderRadius: 18,
-    marginBottom: 12,
+    marginBottom: 22,
+    width: width - 36,
+    alignSelf: 'center',
   },
   youCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: 64,
+    borderRadius: 18,
     backgroundColor: 'rgba(0,0,0,0.65)',
-    borderRadius: 18,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
+    overflow: 'hidden',
   },
-  youEmojiContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.18)',
+  youIconWrap: {
+    width: 64,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    backgroundColor: 'transparent',
   },
-  youEmoji: {
-    fontSize: 22,
+  youIcon: {
+    fontSize: 32,
+  },
+  youInfo: {
+    flex: 1,
+    justifyContent: 'center',
+    marginLeft: 18,
   },
   youName: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    marginBottom: 2,
   },
   youSign: {
+    color: '#b0b0b0',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  actionsWrap: {
+    marginTop: 32,
+    alignItems: 'center',
+  },
+  actionBtn: {
+    width: width - 36,
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 18,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  actionText: {
     color: 'white',
-    fontSize: 15,
-    marginTop: 2,
-    opacity: 0.8,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 }); 

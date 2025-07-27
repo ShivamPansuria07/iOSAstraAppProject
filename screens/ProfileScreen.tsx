@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import supabase from '../services/supabase';
+import { useNavigation } from '@react-navigation/native';
 
 const zodiacSigns = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
@@ -9,12 +11,13 @@ const zodiacSigns = [
 
 export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('john.doe@example.com');
+  const [name, setName] = useState('Shivam Pansuria');
+  const [email, setEmail] = useState('shivam.pansuria@gmail.com');
   const [zodiac, setZodiac] = useState('Aquarius');
   const [editName, setEditName] = useState(name);
   const [editEmail, setEditEmail] = useState(email);
   const [editZodiac, setEditZodiac] = useState(zodiac);
+  const navigation = useNavigation();
 
   const handleSave = () => {
     setName(editName);
@@ -23,20 +26,32 @@ export default function ProfileScreen() {
     setModalVisible(false);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive' },
+      { text: 'Sign Out', style: 'destructive', onPress: async () => {
+        await supabase.auth.signOut();
+        // No navigation.reset needed
+      } },
     ]);
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     Alert.alert(
       'Delete Account',
       'This action cannot be undone. All your data will be permanently deleted.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive' },
+        { text: 'Delete', style: 'destructive', onPress: async () => {
+          const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : null;
+          if (user) {
+            await supabase.auth.signOut();
+            Alert.alert('Account deleted (demo)', 'In production, call a backend function to delete the user.');
+            // No navigation.reset needed
+          } else {
+            Alert.alert('Error', 'Could not get user info.');
+          }
+        } },
       ]
     );
   };
@@ -183,7 +198,7 @@ const styles = StyleSheet.create({
   },
   email: {
     color: '#b0b0b0',
-    fontSize: 15,
+    fontSize: 14,
     marginBottom: 2,
   },
   zodiac: {

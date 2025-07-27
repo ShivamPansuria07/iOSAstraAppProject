@@ -9,6 +9,8 @@ import ChatScreen from './screens/ChatScreen';
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import supabase from './services/supabase';
+import SettingsScreen from './screens/SettingsScreen';
+import HistoryScreen from './screens/HistoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +57,8 @@ export default function App() {
           <>
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
             <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="History" component={HistoryScreen} />
           </>
         ) : (
           <>
