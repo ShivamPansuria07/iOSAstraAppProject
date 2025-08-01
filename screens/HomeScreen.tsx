@@ -3,20 +3,19 @@ import { View, Text, StyleSheet, Animated, TouchableOpacity, SafeAreaView, Dimen
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { colors } from '../theme';
 
 const { width } = Dimensions.get('window');
-//scientia -> knowledge in latin
+
 const features = [
-  { id: 1, key: 'ask', title: 'Ask me anything', emoji: '🎱', gradient: ['#7F00FF', '#E100FF'] },
-  { id: 2, key: 'horoscope', title: 'Daily horoscope', emoji: '🔮', gradient: ['#43E97B', '#38F9D7'] },
-  { id: 3, key: 'romantic', title: 'Romantic compatibility', emoji: '🌹', gradient: ['#FF5858', '#FBCA1F'] },
-  { id: 4, key: 'soulmate', title: 'Your soulmate', emoji: '🧷', gradient: ['#FF512F', '#F09819'] },
-  { id: 5, key: 'friend', title: 'Friend compatibility', emoji: '🤝', gradient: ['#36D1C4', '#1EAAF1'] },
-  { id: 6, key: 'dream', title: 'Dream interpreter', emoji: '💭', gradient: ['#F7971E', '#FFD200'] },
-  { id: 7, key: 'astro', title: 'Astrological events', emoji: '🌟', gradient: ['#43C6AC', '#191654'] },
-  { id: 8, key: 'tarot', title: 'Tarot card interpreter', emoji: '🌞', gradient: ['#a18cd1', '#fbc2eb'] },
-  { id: 9, key: 'growth', title: 'Personal growth tips', emoji: '📈', gradient: ['#43cea2', '#185a9d'] },
+  { id: 1, key: 'ask', title: 'Life Guidance', emoji: '✨', gradient: ['#8B5CF6', '#7C3AED'] },
+  { id: 2, key: 'horoscope', title: 'Daily Insights', emoji: '🔮', gradient: ['#EC4899', '#BE185D'] },
+  { id: 3, key: 'romantic', title: 'Love & Relationships', emoji: '💕', gradient: ['#F59E0B', '#D97706'] },
+  { id: 4, key: 'soulmate', title: 'Soul Connections', emoji: '💫', gradient: ['#06B6D4', '#0891B2'] },
+  { id: 5, key: 'friend', title: 'Friendship Harmony', emoji: '🤝', gradient: ['#10B981', '#059669'] },
+  { id: 6, key: 'dream', title: 'Dream Analysis', emoji: '🌙', gradient: ['#6366F1', '#4F46E5'] },
+  { id: 7, key: 'astro', title: 'Cosmic Events', emoji: '⭐', gradient: ['#F97316', '#EA580C'] },
+  { id: 8, key: 'tarot', title: 'Tarot Wisdom', emoji: '🎴', gradient: ['#8B5CF6', '#7C3AED'] },
+  { id: 9, key: 'growth', title: 'Personal Evolution', emoji: '🚀', gradient: ['#84CC16', '#65A30D'] },
 ];
 
 export default function HomeScreen() {
@@ -32,167 +31,168 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Top bar with history and menu icons */}
+        {/* Top bar */}
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('History')}>
-            <Ionicons name="time-outline" size={32} color="white" />
+            <Ionicons name="time-outline" size={28} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={{ flex: 1 }} />
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('RatingModal')}>
+            <Ionicons name="star" size={28} color="#8B5CF6" />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Settings')}>
-            <Ionicons name="ellipsis-horizontal" size={32} color="white" />
+            <Ionicons name="ellipsis-horizontal" size={28} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
-        {/* Astra logo and sparkles, styled and positioned to match screenshot */}
+
+        {/* Logo */}
         <Animated.View style={[styles.logoBlock, { opacity: logoOpacity }]} pointerEvents="none">
-          <Text style={styles.logoText}>Astra</Text>
-          <Text style={[styles.sparkle, styles.sparkle1]}>⋆</Text>
-          <Text style={[styles.sparkle, styles.sparkle2]}>⋆</Text>
-          <Text style={[styles.sparkle, styles.sparkle3]}>✦</Text>
-          <Text style={[styles.sparkle, styles.sparkle4]}>⋆</Text>
-          <Text style={[styles.sparkle, styles.sparkle5]}>⋆</Text>
+          <Text style={[styles.cosmicElement, styles.cosmic3]}>⭐</Text>
+          <Text style={styles.logoText}>Vita</Text>
+          <Text style={styles.tagline}>Your Life's Compass</Text>
+          <Text style={[styles.cosmicElement, styles.cosmic1]}>✨</Text>
+          <Text style={[styles.cosmicElement, styles.cosmic2]}>💫</Text>
         </Animated.View>
-        {/* Feature list */}
+
+        {/* Features Grid */}
         <Animated.ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 32, paddingTop: 190 }}
+          contentContainerStyle={styles.scrollContent}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: false }
           )}
           scrollEventThrottle={16}
         >
-          {features.map((feature, idx) => (
-            <View key={feature.id} style={styles.featureRowWrap}>
+          <View style={styles.featuresGrid}>
+            {features.map((feature) => (
               <TouchableOpacity
-                style={styles.featureRow}
-                activeOpacity={0.85}
+                key={feature.id}
+                style={styles.featureCard}
+                activeOpacity={0.9}
                 onPress={() => navigation.navigate('Chat', { feature: feature.key })}
               >
                 <LinearGradient
                   colors={feature.gradient as [string, string]}
                   start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.iconLabelCard}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.cardGradient}
                 >
-                  <View style={styles.iconSection}>
-                    <Text style={styles.emoji}>{feature.emoji}</Text>
-                  </View>
-                  <View style={styles.labelSection}>
-                    <Text style={styles.labelText}>{feature.title}</Text>
-                  </View>
+                  <Text style={styles.cardEmoji}>{feature.emoji}</Text>
+                  <Text style={styles.cardTitle}>{feature.title}</Text>
                 </LinearGradient>
               </TouchableOpacity>
-            </View>
-          ))}
+            ))}
+          </View>
         </Animated.ScrollView>
       </View>
     </SafeAreaView>
   );
 }
 
-const CARD_HEIGHT = 68;
-const ICON_WIDTH = 68;
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0F0F23',
   },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0F0F23',
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 8,
-    marginBottom: 8,
+    paddingTop: 12,
+    paddingBottom: 8,
     zIndex: 2,
   },
   iconButton: {
-    padding: 4,
+    padding: 8,
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+    borderWidth: 0,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   logoBlock: {
     position: 'absolute',
-    top: 140,
+    top: 120,
     left: 0,
     right: 0,
     alignItems: 'center',
     zIndex: 0,
-    height: 90,
+    height: 80,
     justifyContent: 'center',
   },
   logoText: {
-    fontSize: width * 0.18,
-    fontFamily: 'PlayfairDisplay-Italic-VariableFont', // Use your custom font name here
+    fontSize: width * 0.16,
+    fontFamily: 'PlayfairDisplay-Italic-VariableFont',
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFFFFF',
     letterSpacing: 2,
     textAlign: 'center',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 16,
-  },
-  sparkle: {
-    position: 'absolute',
-    color: 'white',
-    fontSize: 22,
-    opacity: 1,
-    textShadowColor: '#000',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  sparkle1: { left: '10%', top: 10 },
-  sparkle2: { right: '10%', top: 10 },
-  sparkle3: { left: '48%', top: 0, fontSize: 28 },
-  sparkle4: { left: '20%', bottom: 0 },
-  sparkle5: { right: '20%', bottom: 0 },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 0,
+    textShadowColor: 'rgba(139, 92, 246, 0.8)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 15,
     zIndex: 1,
   },
-  featureRowWrap: {
-    alignItems: 'center',
-    marginBottom: 18,
+  tagline: {
+    fontSize: 14,
+    color: '#F59E0B',
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
-  featureRow: {
-    width: width - 32,
-    alignSelf: 'center',
-    height: CARD_HEIGHT,
-    borderRadius: CARD_HEIGHT / 2,
-    overflow: 'hidden',
+  cosmicElement: {
+    position: 'absolute',
+    fontSize: 20,
+    opacity: 0.9,
   },
-  iconLabelCard: {
+  cosmic1: { left: '15%', top: 8, color: '#F59E0B', fontSize: 22 },
+  cosmic2: { right: '15%', top: 8, color: '#EC4899', fontSize: 22 },
+  cosmic3: { left: '65%', top: -15, fontSize: 28, color: '#F97316', zIndex: -1 },
+  scrollView: {
+    flex: 1,
+    zIndex: 1,
+  },
+  scrollContent: {
+    paddingTop: 200,
+    paddingBottom: 32,
+    paddingHorizontal: 16,
+  },
+  featuresGrid: {
     flexDirection: 'row',
-    width: '100%',
-    height: CARD_HEIGHT,
-    borderRadius: CARD_HEIGHT / 2,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  featureCard: {
+    width: (width - 44) / 2,
+    height: 100,
+    borderRadius: 16,
     overflow: 'hidden',
+    marginBottom: 12,
   },
-  iconSection: {
-    width: ICON_WIDTH,
-    height: CARD_HEIGHT,
-    alignItems: 'center',
+  cardGradient: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 16,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  emoji: {
+  cardEmoji: {
     fontSize: 32,
   },
-  labelSection: {
-    flex: 1,
-    height: CARD_HEIGHT,
-    backgroundColor: '#232323',
-    justifyContent: 'center',
-    paddingLeft: 18,
-  },
-  labelText: {
+  cardTitle: {
     color: 'white',
-    fontSize: 19,
-    fontWeight: 'bold',
-    letterSpacing: 0.1,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    marginTop: 8,
   },
 }); 

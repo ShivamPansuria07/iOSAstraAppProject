@@ -7,7 +7,7 @@ const { width } = Dimensions.get('window');
 export default function PeopleScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <View style={styles.container}>
         <Text style={styles.title}>People in your life</Text>
         <Text style={styles.subtitle}>People will be added automatically as you talk about them in chat</Text>
 
@@ -36,7 +36,7 @@ export default function PeopleScreen() {
             <View style={styles.youInfo}>
               <Text style={styles.youName}>You</Text>
               <Text style={styles.youSign}>⚙ Aquarius</Text>
-            </View>
+          </View>
           </View>
         </LinearGradient>
 
@@ -49,7 +49,7 @@ export default function PeopleScreen() {
             <Text style={[styles.actionText, { color: '#ff4d4d' }]}>Delete Account</Text>
           </TouchableOpacity>
         </View>
-      </View>
+    </View>
     </SafeAreaView>
   );
 }

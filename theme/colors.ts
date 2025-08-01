@@ -1,21 +1,21 @@
 export const colors = {
-  // Primary colors
-  primary: '#6366F1', // Indigo
-  primaryDark: '#4F46E5',
-  primaryLight: '#818CF8',
+  // Primary colors - Vita's signature purple and gold theme
+  primary: '#8B5CF6', // Vibrant purple
+  primaryDark: '#7C3AED',
+  primaryLight: '#A78BFA',
   
-  // Background colors
-  background: '#0F0F23', // Dark blue-black
-  surface: '#1A1A2E', // Slightly lighter dark
-  card: '#16213E', // Card background
+  // Background colors - Deep cosmic theme
+  background: '#1a1a2e', // Deep cosmic blue
+  surface: '#16213e', // Darker cosmic blue
+  card: '#0f3460', // Deep ocean blue
   
   // Text colors
-  text: '#FFFFFF',
-  textSecondary: '#A1A1AA',
-  textMuted: '#71717A',
+  text: '#FFFFFF', // Pure white
+  textSecondary: '#E2E8F0',
+  textMuted: '#94A3B8',
   
-  // Accent colors
-  accent: '#F59E0B', // Amber
+  // Accent colors - Gold and rose
+  accent: '#F59E0B', // Gold
   accentLight: '#FBBF24',
   
   // Status colors
@@ -24,17 +24,17 @@ export const colors = {
   warning: '#F59E0B',
   info: '#3B82F6',
   
-  // Gradient colors
-  gradientStart: '#6366F1',
-  gradientEnd: '#8B5CF6',
+  // Gradient colors - Vita's signature gradients
+  gradientStart: '#8B5CF6',
+  gradientEnd: '#F59E0B',
   
   // Border colors
-  border: '#27272A',
-  borderLight: '#3F3F46',
+  border: '#374151',
+  borderLight: '#4B5563',
   
   // Overlay colors
-  overlay: 'rgba(0, 0, 0, 0.5)',
-  overlayDark: 'rgba(0, 0, 0, 0.8)',
+  overlay: 'rgba(26, 26, 46, 0.5)',
+  overlayDark: 'rgba(26, 26, 46, 0.8)',
 };
 
 export const gradients = {

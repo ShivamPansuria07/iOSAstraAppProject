@@ -1,32 +1,38 @@
 {
   "expo": {
-    "name": "AstraApp",
-    "slug": "AstraApp",
+    "name": "Vita",
+    "slug": "vita-life-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "scheme": "vita",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1a1a2e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shivampansuria.vita"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1a1a2e"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.shivampansuria.vita"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "EXPO_PUBLIC_OPENAI_API_KEY": "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"
+      "EXPO_PUBLIC_OPENAI_API_KEY": "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",
+      "eas": {
+        "projectId": "af6efda3-9c61-479e-977f-d4c95250cd0b"
+      }
     }
   }
 }

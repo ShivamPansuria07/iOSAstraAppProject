@@ -23,6 +23,7 @@ export default function MainTabNavigator() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         headerShown: false,
+        tabBarShowLabel: false,
       }}
     >
       <Tab.Screen

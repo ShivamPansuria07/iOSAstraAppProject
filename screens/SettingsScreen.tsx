@@ -21,17 +21,17 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Edit my information</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>What's my user id?</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row}>
-            <Text style={[styles.rowText, { color: '#ff4d4d' }]}>Delete account</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Text style={[styles.rowText, { color: '#EF4444' }]}>Delete account</Text>
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
         {/* App Settings Section */}
@@ -39,12 +39,12 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Notifications</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Haptics & Vibration</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
         {/* Subscription Section */}
@@ -52,12 +52,12 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Subscription</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Restore purchases</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
         {/* Get in touch Section */}
@@ -65,12 +65,12 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Contact us</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Share troubleshooting info</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
         {/* Legal Section */}
@@ -78,12 +78,12 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Terms of Service</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={styles.row}>
             <Text style={styles.rowText}>Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -94,16 +94,16 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0F0F23',
   },
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingTop: 56,
     paddingBottom: 12,
-    backgroundColor: '#000',
+    backgroundColor: '#0F0F23',
     borderBottomWidth: 1,
-    borderBottomColor: '#222',
+    borderBottomColor: 'rgba(139, 92, 246, 0.2)',
   },
   backButton: {
     paddingHorizontal: 16,
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#8B5CF6',
     flex: 1,
     textAlign: 'center',
     marginRight: 40,
   },
   sectionLabel: {
-    color: '#b0b0b0',
+    color: '#A78BFA',
     fontSize: 16,
     fontWeight: '600',
     marginTop: 28,
@@ -127,12 +127,12 @@ const styles = StyleSheet.create({
     marginLeft: 18,
   },
   sectionCard: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 18,
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    borderRadius: 16,
     marginHorizontal: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#fff2',
+    borderColor: 'rgba(139, 92, 246, 0.2)',
     overflow: 'hidden',
   },
   row: {
@@ -143,13 +143,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   rowText: {
-    color: 'white',
+    color: '#8B5CF6',
     fontSize: 17,
     fontWeight: '500',
   },
   divider: {
     height: 1,
-    backgroundColor: '#222',
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
     marginHorizontal: 12,
   },
 }); 

@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Modal, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Modal, TextInput, Alert, ScrollView, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import supabase from '../services/supabase';
 import { useNavigation } from '@react-navigation/native';
+import { colors, spacing, borderRadius, shadows } from '../theme';
+
+const { width } = Dimensions.get('window');
 
 const zodiacSigns = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
+
+const zodiacEmojis: { [key: string]: string } = {
+  'Aries': '♈', 'Taurus': '♉', 'Gemini': '♊', 'Cancer': '♋',
+  'Leo': '♌', 'Virgo': '♍', 'Libra': '♎', 'Scorpio': '♏',
+  'Sagittarius': '♐', 'Capricorn': '♑', 'Aquarius': '♒', 'Pisces': '♓'
+};
 
 export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,7 +41,6 @@ export default function ProfileScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: async () => {
         await supabase.auth.signOut();
-        // No navigation.reset needed
       } },
     ]);
   };
@@ -47,7 +56,6 @@ export default function ProfileScreen() {
           if (user) {
             await supabase.auth.signOut();
             Alert.alert('Account deleted (demo)', 'In production, call a backend function to delete the user.');
-            // No navigation.reset needed
           } else {
             Alert.alert('Error', 'Could not get user info.');
           }
@@ -58,42 +66,69 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.profileTitle}>Profile</Text>
+      <LinearGradient
+        colors={[colors.background, colors.surface]}
+        style={styles.container}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.profileTitle}>Profile</Text>
+          <Text style={styles.profileSubtitle}>Your Cosmic Journey</Text>
+        </View>
+
+        {/* Profile Card */}
         <LinearGradient
-          colors={["#e96443", "#904e95"]}
+          colors={['#8B5CF6', '#7C3AED']}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={styles.profileCardGradient}
         >
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatar}>🪞</Text>
+              <LinearGradient
+                colors={[colors.accent, colors.accentLight]}
+                style={styles.avatarGradient}
+              >
+                <Text style={styles.avatar}>✨</Text>
+              </LinearGradient>
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={styles.profileInfo}>
               <Text style={styles.name}>{name}</Text>
               <Text style={styles.email}>{email}</Text>
-              <Text style={styles.zodiac}>♒ {zodiac}</Text>
+              <View style={styles.zodiacContainer}>
+                <Text style={styles.zodiacEmoji}>{zodiacEmojis[zodiac]}</Text>
+                <Text style={styles.zodiac}>{zodiac}</Text>
+              </View>
             </View>
-            <TouchableOpacity style={styles.editButton} onPress={() => {
-              setEditName(name); setEditEmail(email); setEditZodiac(zodiac); setModalVisible(true);
-            }}>
-              <Text style={styles.editButtonText}>Edit</Text>
+            <TouchableOpacity 
+              style={styles.editButton} 
+              onPress={() => {
+                setEditName(name); 
+                setEditEmail(email); 
+                setEditZodiac(zodiac); 
+                setModalVisible(true);
+              }}
+            >
+              <Ionicons name="pencil" size={16} color="white" />
             </TouchableOpacity>
           </View>
         </LinearGradient>
 
+
+
+        {/* Settings Section */}
         <View style={styles.settingsSection}>
           <TouchableOpacity style={styles.settingOption} onPress={handleSignOut}>
             <Text style={styles.settingText}>Sign Out</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingOption} onPress={handleDeleteAccount}>
-            <Text style={[styles.settingText, { color: '#ff4d4d' }]}>Delete Account</Text>
+            <Text style={[styles.settingText, { color: '#EF4444' }]}>Delete Account</Text>
           </TouchableOpacity>
         </View>
 
+        {/* App Info */}
         <View style={styles.appInfo}>
-          <Text style={styles.appVersion}>Astra v1.0.0</Text>
+          <Text style={styles.appVersion}>Vita v1.0.0</Text>
           <Text style={styles.appDescription}>
             Your AI-powered life advisor for personalized guidance and insights.
           </Text>
@@ -103,47 +138,75 @@ export default function ProfileScreen() {
         <Modal visible={modalVisible} animationType="slide" transparent>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TextInput
-                style={styles.input}
-                value={editName}
-                onChangeText={setEditName}
-                placeholder="Name"
-                placeholderTextColor="#aaa"
-              />
-              <TextInput
-                style={styles.input}
-                value={editEmail}
-                onChangeText={setEditEmail}
-                placeholder="Email"
-                placeholderTextColor="#aaa"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <Text style={styles.label}>Zodiac Sign</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-                {zodiacSigns.map(sign => (
-                  <TouchableOpacity
-                    key={sign}
-                    style={[styles.zodiacChip, editZodiac === sign && styles.zodiacChipSelected]}
-                    onPress={() => setEditZodiac(sign)}
-                  >
-                    <Text style={[styles.zodiacChipText, editZodiac === sign && { color: '#fff' }]}>{sign}</Text>
+              <LinearGradient
+                colors={[colors.surface, colors.card]}
+                style={styles.modalGradient}
+              >
+                <Text style={styles.modalTitle}>Edit Profile</Text>
+                
+                <TextInput
+                  style={styles.input}
+                  value={editName}
+                  onChangeText={setEditName}
+                  placeholder="Name"
+                  placeholderTextColor={colors.textMuted}
+                />
+                
+                <TextInput
+                  style={styles.input}
+                  value={editEmail}
+                  onChangeText={setEditEmail}
+                  placeholder="Email"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                
+                <Text style={styles.label}>Zodiac Sign</Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false} 
+                  style={styles.zodiacScroll}
+                  contentContainerStyle={styles.zodiacScrollContainer}
+                >
+                  {zodiacSigns.map(sign => (
+                    <TouchableOpacity
+                      key={sign}
+                      style={[
+                        styles.zodiacChip, 
+                        editZodiac === sign && styles.zodiacChipSelected
+                      ]}
+                      onPress={() => setEditZodiac(sign)}
+                    >
+                      <Text style={styles.zodiacChipEmoji}>{zodiacEmojis[sign]}</Text>
+                      <Text style={[
+                        styles.zodiacChipText, 
+                        editZodiac === sign && styles.zodiacChipTextSelected
+                      ]}>
+                        {sign}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                
+                <View style={styles.modalActions}>
+                  <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
-              <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                  <Text style={styles.saveButtonText}>Save</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                    <LinearGradient
+                      colors={['#8B5CF6', '#7C3AED']}
+                      style={styles.saveButtonGradient}
+                    >
+                      <Text style={styles.saveButtonText}>Save Changes</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
             </View>
           </View>
         </Modal>
-      </View>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -151,20 +214,27 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0F0F23',
   },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0F0F23',
     paddingHorizontal: 18,
     paddingTop: 32,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
   profileTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 24,
-    textAlign: 'center',
+    marginBottom: 4,
+  },
+  profileSubtitle: {
+    fontSize: 16,
+    color: '#b0b0b0',
   },
   profileCardGradient: {
     borderRadius: 18,
@@ -187,8 +257,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 18,
   },
+  avatarGradient: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   avatar: {
     fontSize: 28,
+  },
+  profileInfo: {
+    flex: 1,
   },
   name: {
     color: 'white',
@@ -200,6 +280,14 @@ const styles = StyleSheet.create({
     color: '#b0b0b0',
     fontSize: 14,
     marginBottom: 2,
+  },
+  zodiacContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  zodiacEmoji: {
+    fontSize: 18,
+    marginRight: 4,
   },
   zodiac: {
     color: 'white',
@@ -218,10 +306,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 15,
   },
+
   settingsSection: {
     marginTop: 18,
     marginBottom: 18,
   },
+
   settingOption: {
     backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 12,
@@ -256,11 +346,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#181818',
+    backgroundColor: '#0F0F23',
     borderRadius: 18,
     padding: 24,
     width: '90%',
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
+  },
+  modalGradient: {
+    borderRadius: 18,
+    padding: 24,
+    width: '100%',
   },
   modalTitle: {
     color: 'white',
@@ -270,35 +367,52 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   input: {
-    backgroundColor: '#222',
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
     color: 'white',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
   },
   label: {
     color: '#b0b0b0',
     fontSize: 15,
     marginBottom: 6,
   },
+  zodiacScroll: {
+    marginBottom: 16,
+  },
+  zodiacScrollContainer: {
+    flexDirection: 'row',
+  },
   zodiacChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#fff2',
+    borderColor: 'rgba(139, 92, 246, 0.3)',
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 8,
     marginRight: 8,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
   },
   zodiacChipSelected: {
-    backgroundColor: '#e96443',
-    borderColor: '#e96443',
+    backgroundColor: '#8B5CF6',
+    borderColor: '#8B5CF6',
+  },
+  zodiacChipEmoji: {
+    fontSize: 15,
+    marginRight: 4,
   },
   zodiacChipText: {
     color: '#fff',
     fontSize: 15,
+  },
+  zodiacChipTextSelected: {
+    color: 'white',
   },
   modalActions: {
     flexDirection: 'row',
@@ -306,7 +420,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   saveButton: {
-    backgroundColor: '#e96443',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  saveButtonGradient: {
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 10,
@@ -317,13 +435,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   cancelButton: {
-    backgroundColor: '#333',
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
   },
   cancelButtonText: {
-    color: 'white',
+    color: '#8B5CF6',
     fontWeight: 'bold',
     fontSize: 16,
   },

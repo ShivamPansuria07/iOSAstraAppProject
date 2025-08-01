@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { colors, spacing, borderRadius, shadows } from '../theme';
 import { ChatMessage as ChatMessageType } from '../services/openai';
 
@@ -14,8 +14,47 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     minute: '2-digit' 
   });
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(isUser ? 30 : -30)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    // Animate message appearance
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 100,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   return (
-    <View style={[styles.container, isUser ? styles.userContainer : styles.aiContainer]}>
+    <Animated.View 
+      style={[
+        styles.container, 
+        isUser ? styles.userContainer : styles.aiContainer,
+        {
+          opacity: fadeAnim,
+          transform: [
+            { translateX: slideAnim },
+            { scale: scaleAnim }
+          ]
+        }
+      ]}
+    >
       <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
         <Text style={[styles.messageText, isUser ? styles.userText : styles.aiText]}>
           {message.content}
@@ -24,7 +63,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           {timestamp}
         </Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -46,14 +85,16 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   userBubble: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#8B5CF6',
     borderBottomRightRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
   aiBubble: {
-    backgroundColor: colors.card,
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
     borderBottomLeftRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
   },
   messageText: {
     fontSize: 16,
@@ -61,21 +102,23 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   userText: {
-    color: colors.text,
+    color: 'white',
+    fontWeight: '500',
+    fontFamily: 'JetBrainsMono-VariableFont',
   },
   aiText: {
-    color: colors.text,
+    color: 'white',
   },
   timestamp: {
     fontSize: 12,
     opacity: 0.7,
   },
   userTimestamp: {
-    color: colors.text,
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'right',
   },
   aiTimestamp: {
-    color: colors.textSecondary,
+    color: 'rgba(139, 92, 246, 0.7)',
     textAlign: 'left',
   },
 }); 
