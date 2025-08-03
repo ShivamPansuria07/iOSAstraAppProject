@@ -40,34 +40,57 @@ export default function AuthOnboardingScreen() {
       if (result.success) {
         console.log('AuthOnboarding: OAuth URL opened, waiting for redirect...');
         
-        Alert.alert(
-          'Sign In Started', 
-          'Please complete the Google sign-in in your browser, then tap "Check Status" to continue.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Check Status',
-              onPress: async () => {
-                try {
-                  const { data: sessionData } = await supabase.auth.getSession();
-                  if (sessionData.session) {
-                    console.log('Session found after OAuth - app will automatically switch');
-                    // Don't navigate manually - let the app's session state handle it
-                  } else {
-                    Alert.alert(
-                      'Not Signed In',
-                      'Please complete the Google sign-in in your browser first, then try again.',
-                      [{ text: 'OK' }]
-                    );
-                  }
-                } catch (error) {
-                  console.log('Error checking session:', error);
-                  Alert.alert('Error', 'Failed to check sign-in status');
-                }
-              }
+        // Start checking for session changes
+        let checkCount = 0;
+        const maxChecks = 15; // Check for 30 seconds (15 * 2 seconds)
+        
+        const checkSession = async () => {
+          try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            
+            if (sessionData.session) {
+              return; // Session found, stop checking
             }
-          ]
-        );
+            
+            checkCount++;
+            if (checkCount < maxChecks) {
+              // Check again in 2 seconds
+              setTimeout(checkSession, 2000);
+            } else {
+              Alert.alert(
+                'Sign In Timeout',
+                'Please complete the Google sign-in in your browser, then tap "Check Status" to continue.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Check Status',
+                    onPress: async () => {
+                      try {
+                        const { data: sessionData } = await supabase.auth.getSession();
+                        if (sessionData.session) {
+                          // Session found, app will automatically switch
+                        } else {
+                          Alert.alert(
+                            'Not Signed In',
+                            'Please complete the Google sign-in in your browser first, then try again.',
+                            [{ text: 'OK' }]
+                          );
+                        }
+                      } catch (error) {
+                        Alert.alert('Error', 'Failed to check sign-in status');
+                      }
+                    }
+                  }
+                ]
+              );
+            }
+          } catch (error) {
+            console.log('Error in session check:', error);
+          }
+        };
+        
+        // Start checking after 2 seconds
+        setTimeout(checkSession, 2000);
       } else {
         console.log('AuthOnboarding: Sign-in failed:', result.error);
         Alert.alert('Error', result.error || 'Google sign-in failed');
@@ -258,11 +281,8 @@ export default function AuthOnboardingScreen() {
               onPress={async () => {
                 try {
                   const { data: sessionData } = await supabase.auth.getSession();
-                  console.log('Manual check: Session data:', sessionData);
                   
                   if (sessionData.session) {
-                    console.log('Manual check: Session found');
-                    console.log('User email:', sessionData.session.user.email);
                     Alert.alert(
                       'Signed In!', 
                       `Welcome ${sessionData.session.user.email}! The app will automatically switch to the main screen.`,
@@ -272,8 +292,7 @@ export default function AuthOnboardingScreen() {
                     Alert.alert('Not Signed In', 'No active session found. Please complete the Google sign-in process.');
                   }
                 } catch (error) {
-                  console.log('Manual check error:', error);
-                  Alert.alert('Error', 'Failed to check session: ' + error.message);
+                  Alert.alert('Error', 'Failed to check session: ' + (error as Error).message);
                 }
               }}
             >

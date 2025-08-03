@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius } from '../theme';
 import ChatMessage from '../components/ChatMessage';
 import OpenAIService, { ChatMessage as ChatMessageType } from '../services/openai';
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const featureConfigs: Record<string, { title: string; systemMessage: string; prompts: string[] }> = {
   ask: {
@@ -104,9 +104,12 @@ export default function ChatScreen() {
   const [error, setError] = useState<string | null>(null);
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isScreenFocused, setIsScreenFocused] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const navigation = useNavigation();
   const lastSentMessageRef = useRef<string>('');
+  const lastSentTimeRef = useRef<number>(0);
+  const isTypingRef = useRef<boolean>(false);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -119,6 +122,11 @@ export default function ChatScreen() {
   const dot3Anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Reset refs immediately when component mounts or feature changes
+    lastSentMessageRef.current = '';
+    lastSentTimeRef.current = 0;
+    isTypingRef.current = false;
+    
     // Initial animation
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -146,18 +154,61 @@ export default function ChatScreen() {
       OpenAIService.addMessage(featureKey, systemMsg);
       setChatHistory([systemMsg]);
       
-      // Animate the typing effect for the initial message
-      animateTyping(config.systemMessage);
+      // Don't animate typing for initial system message to prevent issues
+      // animateTyping(config.systemMessage);
     } else {
       setChatHistory(history);
     }
     
-    // Reset last sent message ref when feature changes
-    lastSentMessageRef.current = '';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featureKey]);
 
+  // Cleanup effect when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset all refs when component unmounts
+      lastSentMessageRef.current = '';
+      lastSentTimeRef.current = 0;
+      isTypingRef.current = false;
+      setIsTyping(false);
+      setTypingText('');
+      setIsScreenFocused(false);
+      stopTypingDotsAnimation();
+    };
+  }, []);
+
+  // Reset refs when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('ChatScreen focused, resetting refs');
+      setIsScreenFocused(true);
+      
+      // Add a small delay to ensure proper reset
+      setTimeout(() => {
+        lastSentMessageRef.current = '';
+        lastSentTimeRef.current = 0;
+        isTypingRef.current = false;
+        setIsTyping(false);
+        setTypingText('');
+        stopTypingDotsAnimation();
+        console.log('Refs reset completed');
+        
+        // Allow messages after a short delay
+        setTimeout(() => {
+          setIsScreenFocused(false);
+          console.log('Screen ready for messages');
+        }, 500);
+      }, 100);
+    }, [])
+  );
+
   const animateTyping = (text: string) => {
+    if (isTypingRef.current) {
+      console.log('Typing animation already running, skipping');
+      return;
+    }
+    
+    isTypingRef.current = true;
     setIsTyping(true);
     setTypingText('');
     let currentIndex = 0;
@@ -174,6 +225,7 @@ export default function ChatScreen() {
         setIsTyping(false);
         setTypingText('');
         stopTypingDotsAnimation();
+        isTypingRef.current = false;
       }
     }, 30); // Adjust speed as needed
   };
@@ -210,14 +262,26 @@ export default function ChatScreen() {
 
   const handleSend = async (text?: string) => {
     const userMessage = (text !== undefined ? text : message).trim();
-    if (!userMessage || loading) return;
-    
-    // Prevent duplicate messages by checking if we just sent the same message
-    if (lastSentMessageRef.current === userMessage) {
+    if (!userMessage || loading || isTypingRef.current || isScreenFocused) {
+      console.log('handleSend blocked:', { userMessage, loading, isTyping: isTypingRef.current, isScreenFocused, lastSent: lastSentMessageRef.current });
       return;
     }
     
+    // Prevent duplicate messages by checking if we just sent the same message
+    const now = Date.now();
+    if (lastSentMessageRef.current === userMessage && (now - lastSentTimeRef.current) < 3000) {
+      console.log('Duplicate message prevented:', userMessage);
+      return;
+    }
+    
+    // Additional check to prevent sending if component is about to unmount
+    if (!userMessage || loading || isTypingRef.current) {
+      return;
+    }
+    
+    console.log('Sending message:', userMessage);
     lastSentMessageRef.current = userMessage;
+    lastSentTimeRef.current = now;
     
     setError(null);
     setLoading(true);
@@ -231,9 +295,9 @@ export default function ChatScreen() {
       timestamp: new Date(),
     };
     
+    // Add user message to UI immediately for responsiveness
     const updatedHistory = [...chatHistory, userMsg];
     setChatHistory(updatedHistory);
-    OpenAIService.addMessage(featureKey, userMsg);
     
     try {
       const response = await OpenAIService.sendMessage(userMessage, featureKey, config.systemMessage);
@@ -241,17 +305,9 @@ export default function ChatScreen() {
       if (!response.success && response.error) {
         setError(response.error);
       } else if (response.success && response.message) {
-        // Add AI message to chat history and animate typing
-        const aiMsg: ChatMessageType = {
-          id: (Date.now() + 1).toString(),
-          content: response.message,
-          role: 'assistant',
-          timestamp: new Date(),
-        };
-        
-        const newHistory = [...updatedHistory, aiMsg];
-        setChatHistory(newHistory);
-        OpenAIService.addMessage(featureKey, aiMsg);
+        // Get the updated history from the service (which includes both user and AI messages)
+        const serviceHistory = OpenAIService.getConversationHistory(featureKey);
+        setChatHistory(serviceHistory);
         
         // Animate typing for AI response
         animateTyping(response.message);
@@ -267,12 +323,13 @@ export default function ChatScreen() {
       // Clear the last sent message ref after a delay to allow for legitimate repeated messages
       setTimeout(() => {
         lastSentMessageRef.current = '';
-      }, 2000);
+        lastSentTimeRef.current = 0;
+      }, 3000);
     }
   };
 
   const handlePrompt = (prompt: string) => {
-    if (loading) return; // Prevent sending while already loading
+    if (loading || isTypingRef.current || isScreenFocused) return; // Prevent sending while loading, typing, or screen focused
     handleSend(prompt);
   };
 
@@ -405,7 +462,7 @@ export default function ChatScreen() {
                 style={styles.promptChip}
                 activeOpacity={0.8}
                 onPress={() => handlePrompt(suggestion)}
-                disabled={loading}
+                disabled={loading || isTypingRef.current || isScreenFocused}
               >
                 <Text style={styles.promptText}>{suggestion}</Text>
               </TouchableOpacity>
@@ -422,18 +479,26 @@ export default function ChatScreen() {
               value={message}
               onChangeText={setMessage}
               multiline
-              editable={!loading}
-              onSubmitEditing={() => handleSend()}
+              editable={!loading && !isTypingRef.current && !isScreenFocused}
+              onSubmitEditing={() => {
+                if (!loading && !isTypingRef.current && !isScreenFocused && message.trim()) {
+                  handleSend();
+                }
+              }}
               returnKeyType="send"
             />
             <TouchableOpacity 
               style={[
                 styles.sendButton, 
-                { opacity: loading || !message.trim() ? 0.5 : 1 }
+                { opacity: loading || isTypingRef.current || isScreenFocused || !message.trim() ? 0.5 : 1 }
               ]} 
               activeOpacity={0.8} 
-              onPress={() => handleSend()} 
-              disabled={loading || !message.trim()}
+              onPress={() => {
+                if (!loading && !isTypingRef.current && !isScreenFocused && message.trim()) {
+                  handleSend();
+                }
+              }} 
+              disabled={loading || isTypingRef.current || isScreenFocused || !message.trim()}
             >
               <Ionicons name="send" size={20} color="white" />
             </TouchableOpacity>
@@ -467,7 +532,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#8B5CF6',
+    color: 'white',
     flex: 1,
     textAlign: 'center',
   },

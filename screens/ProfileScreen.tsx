@@ -40,7 +40,16 @@ export default function ProfileScreen() {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: async () => {
+        // Sign out from Supabase
         await supabase.auth.signOut();
+        
+        // Also clear dev mode if it's active
+        if ((global as any).SET_DEV_MODE) {
+          (global as any).SET_DEV_MODE(false);
+        }
+        
+        // Clear global dev mode flag
+        (global as any).DEV_MODE = false;
       } },
     ]);
   };
@@ -57,7 +66,16 @@ export default function ProfileScreen() {
             await supabase.auth.signOut();
             Alert.alert('Account deleted (demo)', 'In production, call a backend function to delete the user.');
           } else {
-            Alert.alert('Error', 'Could not get user info.');
+            // Handle dev mode case
+            if ((global as any).DEV_MODE) {
+              // Clear dev mode
+              if ((global as any).SET_DEV_MODE) {
+                (global as any).SET_DEV_MODE(false);
+              }
+              (global as any).DEV_MODE = false;
+            } else {
+              Alert.alert('Error', 'Could not get user info.');
+            }
           }
         } },
       ]
@@ -66,10 +84,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <LinearGradient
-        colors={[colors.background, colors.surface]}
-        style={styles.container}
-      >
+      <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.profileTitle}>Profile</Text>
@@ -206,7 +221,7 @@ export default function ProfileScreen() {
             </View>
           </View>
         </Modal>
-      </LinearGradient>
+      </View>
     </SafeAreaView>
   );
 }

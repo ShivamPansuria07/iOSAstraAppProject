@@ -6,10 +6,12 @@ import { useFonts } from 'expo-font';
 import { colors } from './theme';
 import MainTabNavigator from './navigation/MainTabNavigator';
 import SplashScreen from './screens/SplashScreen';
+import PaywallScreen from './screens/PaywallScreen';
 import ChatScreen from './screens/ChatScreen';
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import supabase from './services/supabase';
+import { AuthService } from './services/auth';
 import SettingsScreen from './screens/SettingsScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -46,13 +48,17 @@ export default function App() {
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
+      console.log('Initial session check:', data.session);
       setSession(data.session);
       setIsLoading(false);
     };
     getSession();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session);
       setSession(session);
     });
+    
     return () => {
       listener.subscription.unsubscribe();
     };
@@ -60,9 +66,51 @@ export default function App() {
 
   // Handle deep links for OAuth
   useEffect(() => {
-    const handleDeepLink = (url: string) => {
+    const handleDeepLink = async (url: string) => {
       console.log('Deep link received:', url);
-      // Supabase will handle the OAuth callback automatically
+      
+      // Check if this is an OAuth callback with tokens
+      const hasOAuthTokens = url.includes('access_token=') || url.includes('refresh_token=');
+      
+      if (hasOAuthTokens) {
+        console.log('OAuth callback detected, processing...');
+        
+        // Manually parse the OAuth tokens from the URL
+        try {
+          const urlObj = new URL(url);
+          const fragment = urlObj.hash.substring(1); // Remove the # symbol
+          const params = new URLSearchParams(fragment);
+          
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          
+          if (accessToken && refreshToken) {
+            console.log('Setting session from OAuth tokens...');
+            
+            // Set the session manually
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.error('Error setting session from tokens:', error);
+            } else {
+              console.log('Session set successfully from OAuth tokens');
+              setSession(data.session);
+              return; // Exit early since we set the session
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing OAuth tokens from URL:', e);
+        }
+      }
+      
+      // Fallback: Force a session refresh
+      const result = await AuthService.refreshSession();
+      if (result.success && result.session) {
+        setSession(result.session);
+      }
     };
 
     // Listen for incoming links
@@ -82,13 +130,38 @@ export default function App() {
     };
   }, []);
 
+  // Session monitoring
   useEffect(() => {
-    // Simple fetch test
-    fetch('https://jsonplaceholder.typicode.com/todos/1')
-      .then(res => res.json())
-      .then(data => console.log('Fetch test success:', data))
-      .catch(err => console.log('Fetch test error:', err));
-  }, []);
+    let isActive = true;
+    
+    const checkSessionPeriodically = async () => {
+      if (!isActive) return;
+      
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session && !session) {
+          setSession(data.session);
+        } else if (!data.session && session) {
+          setSession(null);
+        }
+      } catch (error) {
+        console.log('Session check error:', error);
+      }
+    };
+
+    // Check every 2 seconds for the first 30 seconds after app loads
+    const interval = setInterval(checkSessionPeriodically, 2000);
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+    }, 30000);
+
+    return () => {
+      isActive = false;
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [session]);
 
   if (isLoading || !fontsLoaded) {
     return <SplashScreen onFinish={handleSplashFinish} />;

@@ -1,6 +1,8 @@
 import * as WebBrowser from 'expo-web-browser';
 import { Linking } from 'react-native';
+import Constants from 'expo-constants';
 import supabase from './supabase';
+import { getOAuthRedirectUrl, getFinalRedirectUrl } from '../config/auth';
 
 // Complete the auth session
 WebBrowser.maybeCompleteAuthSession();
@@ -11,11 +13,19 @@ export class AuthService {
     try {
       console.log('Starting Google sign-in...');
       
+      // Get the OAuth redirect URL (must be a valid domain for Google)
+      const oauthRedirectUrl = getOAuthRedirectUrl();
+      // Get the final redirect URL for after Supabase processes the OAuth
+      const finalRedirectUrl = getFinalRedirectUrl();
+      
+      console.log('OAuth redirect URL:', oauthRedirectUrl);
+      console.log('Final redirect URL:', finalRedirectUrl);
+      
       // Use Supabase's OAuth flow directly
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://mulfhgmihtxskyggfvix.supabase.co/auth/v1/callback',
+          redirectTo: finalRedirectUrl, // Redirect back to the app after OAuth
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -38,8 +48,8 @@ export class AuthService {
         await Linking.openURL(data.url);
         console.log('Opened OAuth URL in browser');
         
-        // For Expo Go, we'll need to manually check for session after OAuth
-        // The user will need to return to the app manually
+        // For OAuth flows, we need to wait for the user to return to the app
+        // The session will be detected by the deep link handler in App.tsx
         return { success: true, data: { url: data.url, needsManualReturn: true } };
       } else {
         console.log('No redirect URL received');
@@ -54,11 +64,19 @@ export class AuthService {
   // Apple Sign In
   static async signInWithApple() {
     try {
+      // Get the OAuth redirect URL (must be a valid domain for Google)
+      const oauthRedirectUrl = getOAuthRedirectUrl();
+      // Get the final redirect URL for after Supabase processes the OAuth
+      const finalRedirectUrl = getFinalRedirectUrl();
+      
+      console.log('OAuth redirect URL:', oauthRedirectUrl);
+      console.log('Final redirect URL:', finalRedirectUrl);
+
       // Use Supabase's OAuth flow directly
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: 'vita://auth/callback',
+          redirectTo: finalRedirectUrl, // Redirect back to the app after OAuth
         },
       });
 
@@ -135,6 +153,22 @@ export class AuthService {
       return { success: true, user };
     } catch (error) {
       console.error('Get user error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Force session refresh (useful after OAuth flows)
+  static async refreshSession() {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Session refresh error:', error);
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true, session: data.session };
+    } catch (error) {
+      console.error('Session refresh error:', error);
       return { success: false, error: error.message };
     }
   }

@@ -3,16 +3,29 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView, Anima
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 
 const { width, height } = Dimensions.get('window');
 
-const onboardingData = [
+const onboardingData: Array<{
+  id: number;
+  title: string;
+  subtitle: string;
+  icon: string;
+  gradient: [string, string];
+  testimonial: {
+    name: string;
+    text: string;
+    rating: number;
+  };
+}> = [
   {
     id: 1,
     title: "Discover Your Path",
     subtitle: "Unlock personalized insights and cosmic guidance for your life journey",
     icon: "✨",
-    gradient: ['#8B5CF6', '#7C3AED'],
+    gradient: ['#8B5CF6', '#7C3AED'] as [string, string],
     testimonial: {
       name: "Sarah M.",
       text: "Vita has completely transformed how I approach life decisions. The cosmic insights are incredibly accurate!",
@@ -24,7 +37,7 @@ const onboardingData = [
     title: "Cosmic Intelligence",
     subtitle: "AI-powered guidance aligned with celestial energies and your unique path",
     icon: "🔮",
-    gradient: ['#F59E0B', '#FBBF24'],
+    gradient: ['#F59E0B', '#FBBF24'] as [string, string],
     testimonial: {
       name: "Michael R.",
       text: "The cosmic recommendations are spot-on. I've improved my relationships and life choices significantly.",
@@ -36,7 +49,7 @@ const onboardingData = [
     title: "Your Life's Compass",
     subtitle: "Navigate life's challenges with cosmic wisdom and inner clarity",
     icon: "💫",
-    gradient: ['#EC4899', '#F472B6'],
+    gradient: ['#EC4899', '#F472B6'] as [string, string],
     testimonial: {
       name: "Emma L.",
       text: "Finally, an app that understands my cosmic journey and provides genuinely transformative guidance!",
@@ -45,8 +58,10 @@ const onboardingData = [
   }
 ];
 
+type OnboardingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
+
 export default function OnboardingScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<OnboardingScreenNavigationProp>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -279,7 +294,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     width: '100%',
-    backdropFilter: 'blur(10px)',
   },
   testimonialHeader: {
     flexDirection: 'row',
