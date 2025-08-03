@@ -4,9 +4,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme/colors';
+import analytics from '../services/analytics';
 
-export default function PaywallScreen() {
+interface PaywallScreenProps {
+  onPaywallSkipped?: () => void;
+}
+
+export default function PaywallScreen({ onPaywallSkipped }: PaywallScreenProps) {
   const navigation = useNavigation();
+
+  // Track paywall shown when component mounts
+  React.useEffect(() => {
+    analytics.trackPaywallShown();
+  }, []);
 
   const handleSkip = () => {
     Alert.alert(
@@ -17,8 +27,8 @@ export default function PaywallScreen() {
         { 
           text: 'Skip for Now', 
           onPress: () => {
-            // TODO: Add analytics tracking here
-            // analytics.track("Paywall Skipped");
+            analytics.trackPaywallSkipped();
+            onPaywallSkipped?.();
             navigation.navigate('AuthOnboarding');
           }
         }
@@ -27,6 +37,7 @@ export default function PaywallScreen() {
   };
 
   const handleRestorePurchases = () => {
+    analytics.track('Restore Purchases Attempted');
     Alert.alert(
       'Restore Purchases',
       'This feature will be available soon. For now, please contact support if you need to restore a previous purchase.',

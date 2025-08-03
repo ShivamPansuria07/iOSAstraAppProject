@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { AuthService } from '../services/auth';
 import supabase from '../services/supabase';
+import analytics from '../services/analytics';
 
 const { width, height } = Dimensions.get('window');
 
@@ -33,6 +34,7 @@ export default function AuthOnboardingScreen() {
   const handleGoogleSignIn = async () => {
     setSocialLoading(true);
     try {
+      analytics.trackSignIn('google');
       console.log('AuthOnboarding: Starting Google sign-in...');
       const result = await AuthService.signInWithGoogle();
       console.log('AuthOnboarding: Google sign-in result:', result);
@@ -106,6 +108,7 @@ export default function AuthOnboardingScreen() {
   const handleAppleSignIn = async () => {
     setSocialLoading(true);
     try {
+      analytics.trackSignIn('apple');
       const result = await AuthService.signInWithApple();
       if (result.success) {
         // Don't navigate manually - let the app's session state handle it

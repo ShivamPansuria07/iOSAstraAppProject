@@ -29,6 +29,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
   const [devMode, setDevMode] = useState(false);
+  const [paywallShown, setPaywallShown] = useState(false);
 
   // Load fonts
   const [fontsLoaded] = useFonts({
@@ -180,8 +181,26 @@ export default function App() {
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="RatingModal" component={RatingModal} />
           </>
+        ) : paywallShown ? (
+          <>
+            <Stack.Screen name="AuthOnboarding" component={AuthOnboardingScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </>
         ) : (
           <>
+            <Stack.Screen 
+              name="Paywall" 
+              component={(props: any) => (
+                <PaywallScreen 
+                  {...props} 
+                  onPaywallSkipped={() => setPaywallShown(true)}
+                />
+              )}
+              options={{
+                gestureEnabled: false,
+              }}
+            />
             <Stack.Screen name="AuthOnboarding" component={AuthOnboardingScreen} />
             <Stack.Screen name="SignIn" component={SignInScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
