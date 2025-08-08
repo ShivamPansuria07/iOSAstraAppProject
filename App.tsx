@@ -18,6 +18,7 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import RatingModal from './screens/RatingModal';
 import AuthOnboardingScreen from './screens/AuthOnboardingScreen';
 import * as Linking from 'expo-linking';
+import Purchases from 'react-native-purchases';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,12 +48,28 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Initialize RevenueCat
+    const initializeRevenueCat = async () => {
+      try {
+        await Purchases.configure({
+          apiKey: 'appl_hUpckXhQcXICpipFnPVmyNTQwXO', // iOS API key
+          appUserID: null, // Will be set when user logs in
+        });
+        console.log('RevenueCat initialized successfully');
+      } catch (error) {
+        console.error('Error initializing RevenueCat:', error);
+      }
+    };
+
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
       console.log('Initial session check:', data.session);
       setSession(data.session);
       setIsLoading(false);
     };
+
+    // Initialize both RevenueCat and get session
+    initializeRevenueCat();
     getSession();
     
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {

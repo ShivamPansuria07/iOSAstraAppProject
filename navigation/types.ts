@@ -1,6 +1,7 @@
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
+  OnboardingChat: undefined;
   Paywall: undefined;
   AuthOnboarding: undefined;
   SignIn: undefined;

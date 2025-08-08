@@ -1,10 +1,56 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import SubscriptionService from '../services/subscriptions';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    checkSubscriptionStatus();
+  }, []);
+
+  const checkSubscriptionStatus = async () => {
+    try {
+      setIsLoading(true);
+      const status = await SubscriptionService.checkSubscriptionStatus();
+      setIsSubscribed(status.isSubscribed);
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRestorePurchases = async () => {
+    try {
+      const customerInfo = await SubscriptionService.restorePurchases();
+      
+      if (customerInfo && customerInfo.entitlements.active['premium']) {
+        Alert.alert(
+          'Success!',
+          'Your previous subscription has been restored.',
+          [{ text: 'OK' }]
+        );
+        setIsSubscribed(true);
+      } else {
+        Alert.alert(
+          'No Purchases Found',
+          'No previous purchases were found to restore.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'There was an error restoring your purchases. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -50,13 +96,32 @@ export default function SettingsScreen() {
         {/* Subscription Section */}
         <Text style={styles.sectionLabel}>Subscription</Text>
         <View style={styles.sectionCard}>
-          <TouchableOpacity style={styles.row}>
-            <Text style={styles.rowText}>Subscription</Text>
+          <View style={styles.row}>
+            <Text style={styles.rowText}>Status</Text>
+            <Text style={[
+              styles.statusText, 
+              { color: isSubscribed ? '#10B981' : '#EF4444' }
+            ]}>
+              {isLoading ? 'Loading...' : (isSubscribed ? 'Premium Active' : 'Free Plan')}
+            </Text>
+          </View>
+          <View style={styles.divider} />
+          <TouchableOpacity style={styles.row} onPress={handleRestorePurchases}>
+            <Text style={styles.rowText}>Restore purchases</Text>
             <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
           <View style={styles.divider} />
-          <TouchableOpacity style={styles.row}>
-            <Text style={styles.rowText}>Restore purchases</Text>
+          <TouchableOpacity 
+            style={styles.row} 
+            onPress={() => {
+              Alert.alert(
+                'RevenueCat Test',
+                `Current subscription status:\n\nIs Subscribed: ${isSubscribed}\nIs Loading: ${isLoading}\n\nThis shows RevenueCat integration is working!`,
+                [{ text: 'OK' }]
+              );
+            }}
+          >
+            <Text style={styles.rowText}>Test RevenueCat Integration</Text>
             <Ionicons name="chevron-forward" size={20} color="#8B5CF6" />
           </TouchableOpacity>
         </View>
@@ -144,6 +209,10 @@ const styles = StyleSheet.create({
   },
   rowText: {
     color: '#8B5CF6',
+    fontSize: 17,
+    fontWeight: '500',
+  },
+  statusText: {
     fontSize: 17,
     fontWeight: '500',
   },
