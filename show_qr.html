@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expo Go QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            background: #16213e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        h1 {
+            margin-top: 0;
+            color: #0f3460;
+        }
+        #qrcode {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .url {
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .instructions {
+            margin-top: 20px;
+            text-align: left;
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Expo Go QR Code</h1>
+        <div id="qrcode"></div>
+        <div class="url" id="url"></div>
+        <div class="instructions">
+            <h3>How to Connect:</h3>
+            <ol>
+                <li>Open <strong>Expo Go</strong> app on your iPhone</li>
+                <li>Tap <strong>"Scan QR code"</strong></li>
+                <li>Point your camera at the QR code above</li>
+                <li>Make sure your phone and computer are on the same WiFi</li>
+            </ol>
+            <p><strong>Or manually enter:</strong> Copy the URL above and paste it in Expo Go</p>
+        </div>
+    </div>
+    <script>
+        // Get connection URL
+        const localIP = '100.69.186.209'; // Update this if needed
+        const connectionURL = `exp://${localIP}:8081`;
+        
+        document.getElementById('url').textContent = connectionURL;
+        
+        // Generate QR code
+        QRCode.toCanvas(document.getElementById('qrcode'), connectionURL, {
+            width: 300,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) console.error(error);
+        });
+    </script>
+</body>
+</html>

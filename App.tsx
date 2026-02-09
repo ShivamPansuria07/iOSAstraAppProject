@@ -48,16 +48,22 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Initialize RevenueCat
+    // Initialize RevenueCat (only works in development builds, not Expo Go)
     const initializeRevenueCat = async () => {
       try {
-        await Purchases.configure({
-          apiKey: 'appl_hUpckXhQcXICpipFnPVmyNTQwXO', // iOS API key
-          appUserID: null, // Will be set when user logs in
-        });
-        console.log('RevenueCat initialized successfully');
+        // Check if Purchases is available (not available in Expo Go)
+        if (Purchases && typeof Purchases.configure === 'function') {
+          await Purchases.configure({
+            apiKey: 'appl_hUpckXhQcXICpipFnPVmyNTQwXO', // iOS API key
+            appUserID: null, // Will be set when user logs in
+          });
+          console.log('RevenueCat initialized successfully');
+        } else {
+          console.log('RevenueCat not available in Expo Go - skipping initialization');
+        }
       } catch (error) {
-        console.error('Error initializing RevenueCat:', error);
+        console.log('RevenueCat initialization skipped (Expo Go mode):', error);
+        // Continue app loading even if RevenueCat fails
       }
     };
 
