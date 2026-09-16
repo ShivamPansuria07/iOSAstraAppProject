@@ -23,7 +23,7 @@ This app has been integrated with RevenueCat for subscription management. The in
 - `eas.json` - Updated for iOS simulator builds
 
 ## API Keys
-- **iOS API Key**: `appl_hUpckXhQcXICpipFnPVmyNTQwXO` (configured)
+- **iOS API Key**: set `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY` in `.env` (see `.env.example`)
 - **Android API Key**: Not configured yet
 
 ## How to Use

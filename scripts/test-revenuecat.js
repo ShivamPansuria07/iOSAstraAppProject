@@ -11,7 +11,7 @@ console.log('🎯 RevenueCat Testing Guide\n');
 
 console.log('📱 Current Setup:');
 console.log('✅ RevenueCat SDK v9.1.0 installed');
-console.log('✅ iOS API Key configured: appl_hUpckXhQcXICpipFnPVmyNTQwXO');
+console.log('✅ iOS API Key loaded from EXPO_PUBLIC_REVENUECAT_IOS_API_KEY');
 console.log('✅ Subscription service implemented');
 console.log('✅ Settings screen integration complete\n');
 

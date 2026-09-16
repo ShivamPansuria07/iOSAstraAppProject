@@ -1,7 +1,7 @@
 # 🔧 Expo Go Connection Fix - Tunnel Mode
 
 ## Problem
-You were getting a timeout error: "Unknown error: The request timed out" when trying to connect via `exp://192.168.1.103:8081`
+You were getting a timeout error: "Unknown error: The request timed out" when trying to connect via `exp://YOUR_LOCAL_IP:8081`
 
 ## Solution: Tunnel Mode
 Tunnel mode creates a public URL that works from anywhere, bypassing network and firewall issues.

@@ -9,7 +9,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const getCurrentExpoUrl = () => {
   // In a real app, this would come from Constants.expoConfig?.hostUri
   // For this script, we'll use a placeholder that you should update
-  return 'exp://192.168.1.103:8081'; // UPDATE THIS WITH YOUR ACTUAL EXPO GO URL
+  return 'exp://127.0.0.1:8081'; // UPDATE THIS WITH YOUR ACTUAL EXPO GO URL
 };
 
 const getSupabaseSiteUrl = () => {
@@ -36,7 +36,7 @@ console.log('  - vita://auth/callback (for production)\n');
 
 console.log('🔧 For Google Cloud Console:');
 console.log('Add these URLs to "Authorized redirect URIs":');
-console.log('  - https://mulfhgmihtxskyggfvix.supabase.co/auth/v1/callback');
+console.log('  - https://YOUR_PROJECT.supabase.co/auth/v1/callback');
 
 console.log('\n📝 Instructions:');
 console.log('1. Copy these URLs to your Supabase and Google Cloud Console configurations');

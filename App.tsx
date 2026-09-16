@@ -52,9 +52,10 @@ export default function App() {
     const initializeRevenueCat = async () => {
       try {
         // Check if Purchases is available (not available in Expo Go)
-        if (Purchases && typeof Purchases.configure === 'function') {
+        const revenueCatApiKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
+        if (Purchases && typeof Purchases.configure === 'function' && revenueCatApiKey) {
           await Purchases.configure({
-            apiKey: 'appl_hUpckXhQcXICpipFnPVmyNTQwXO', // iOS API key
+            apiKey: revenueCatApiKey,
             appUserID: null, // Will be set when user logs in
           });
           console.log('RevenueCat initialized successfully');

@@ -21,8 +21,8 @@ const zodiacEmojis: { [key: string]: string } = {
 
 export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState('Shivam Pansuria');
-  const [email, setEmail] = useState('shivam.pansuria@gmail.com');
+  const [name, setName] = useState('Guest');
+  const [email, setEmail] = useState('guest@example.com');
   const [zodiac, setZodiac] = useState('Aquarius');
   const [editName, setEditName] = useState(name);
   const [editEmail, setEditEmail] = useState(email);
